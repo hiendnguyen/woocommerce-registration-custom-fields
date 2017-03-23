@@ -56,7 +56,6 @@ function wooc_extra_register_fields() {
 }
 add_action( 'woocommerce_register_form_start', 'wooc_extra_register_fields' );
 
-
 function wooc_subscribe_to_newsletter(){
 	?>
 	<p class="form-row form-row-wide" id="subscribe_to_newsletter_field"><label class="checkbox ">
@@ -146,6 +145,7 @@ function wooc_registration_redirect( $redirect_to ) {
 }
 add_filter('woocommerce_registration_redirect', 'wooc_registration_redirect');
 
+/*** Notify user on WooCommerce Registration ***/
 function wooc_init(){
     if(isset($_GET['context']) && $_GET['context'] == 'RegistrationSucceeded'){
 		if(isset($_GET['email'])){
@@ -157,3 +157,17 @@ function wooc_init(){
     }
 }
 add_action( 'init', 'wooc_init' );
+
+/*** Notify admin on WooCommerce User Registration ***/
+function admin_email_on_registration( $customer_id) {
+	wp_new_user_notification( $customer_id );
+}
+add_action('woocommerce_created_customer', 'admin_email_on_registration', 10 , 1);
+
+/*** Remove WooCommerce Password Strength Meter ***/
+function wc_ninja_remove_password_strength() {
+	if ( wp_script_is( 'wc-password-strength-meter', 'enqueued' ) ) {
+		wp_dequeue_script( 'wc-password-strength-meter' );
+	}
+}
+add_action( 'wp_print_scripts', 'wc_ninja_remove_password_strength', 100 );
